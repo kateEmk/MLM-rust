@@ -10,53 +10,53 @@ use crate::{
 use crate::utils::transfer_tokens;
 
 
-pub fn invest(ctx: Context<Invest>, amount: u64, payer_account: Pubkey) -> ProgramResult {
-    if amount < MINIMUM_INVEST {
+pub fn invest(ctx: Context<Invest>, invest_amount: u64, payer_account: Pubkey) -> ProgramResult {
+    if invest_amount < MINIMUM_INVEST {
         panic!("You sent less lamports than needed");
     }
 
     let from_pubkey = Pubkey::new_unique();
-    let amount_to_account = amount as f64 * 0.95;
+    let amount_to_account = invest_amount as f64 * 0.95;
     transfer_tokens(from_pubkey, payer_account, amount_to_account as f32);
     ctx.accounts.mlm_system.accounts_balance.insert(payer_account, amount_to_account as f32);
     Ok(())
 }
 
 
-pub fn withdraw(ctx: Context<Withdraw>, account_to_withdraw: Pubkey) -> ProgramResult {
-    let mut user_balance: f32 = *ctx.accounts.mlm_system.accounts_balance.get(&account_to_withdraw).unwrap();
+pub fn withdraw(ctx: Context<Withdraw>, payment_account: Pubkey) -> ProgramResult {
+    let mut user_balance: f32 = *ctx.accounts.mlm_system.accounts_balance.get(&payment_account).unwrap();
 
     if user_balance <= 0.0 {
         panic!("You don't have money to withdraw");
     }
 
     const PERCENTAGE: usize = 1000;
-    let mut current_address: Pubkey = account_to_withdraw;
-    let mut counter_depth: f64 = 0.0;
-    let mut comission: f32 = 0.0;
+    let mut current_address: Pubkey = payment_account;
+    let mut counter_depth_of_referal: f64 = 0.0;
+    let mut comission_to_partner_account: f32 = 0.0;
     let mut index;
 
     for _i in 0..10 {
-        while account_to_withdraw.to_string() != " " {
-            counter_depth += 1.0;
-            current_address = *ctx.accounts.mlm_system.referal_of_the_user.get(&account_to_withdraw).unwrap();
-            index = get_level(ctx.accounts.mlm_system.borrow(), account_to_withdraw) as usize / PERCENTAGE;
-            comission = user_balance * LEVEL_COMISSION[index];
-            transfer_tokens(account_to_withdraw, current_address, comission);
-            user_balance = user_balance - comission;
+        while payment_account.to_string() != " " {
+            counter_depth_of_referal += 1.0;
+            current_address = *ctx.accounts.mlm_system.referal_of_the_user.get(&payment_account).unwrap();
+            index = get_level(ctx.accounts.mlm_system.borrow(), payment_account) as usize / PERCENTAGE;
+            comission_to_partner_account = user_balance * LEVEL_COMISSION[index];
+            transfer_tokens(payment_account, current_address, comission_to_partner_account);
+            user_balance = user_balance - comission_to_partner_account;
         }
     }
 
-    *ctx.accounts.mlm_system.accounts_balance.get_mut(&account_to_withdraw).unwrap() = 0.0;
+    *ctx.accounts.mlm_system.accounts_balance.get_mut(&payment_account).unwrap() = 0.0;
     Ok(())
 }
 
 
 pub fn get_level(mlm_system: &MLmSystem, account: Pubkey) -> u128 {
-    let balance: f64 = *(mlm_system.accounts_balance.get(&account).unwrap()) as f64;
+    let user_balance: f64 = *(mlm_system.accounts_balance.get(&account).unwrap()) as f64;
     let mut res: u128 = 0;
     for mut i in 0..9 {
-        if balance < LEVEL_INVESTMENTS[i] {
+        if user_balance < LEVEL_INVESTMENTS[i] {
             res = (i + 1) as u128;
         }
     }
@@ -74,8 +74,8 @@ pub fn signup(ctx: Context<Signup>, account: Pubkey, referal_link: Pubkey) -> Pr
 }
 
 
-pub fn get_partners_info(ctx: Context<DirectPartners>, sender: Pubkey) -> ProgramResult {
-    let partners_addresses: Vec<Pubkey> = (*ctx.accounts.mlm_system.partners_users[&sender]).to_vec();
+pub fn get_partners_info(ctx: Context<DirectPartners>, account_to_get_partners: Pubkey) -> ProgramResult {
+    let partners_addresses: Vec<Pubkey> = (*ctx.accounts.mlm_system.partners_users[&account_to_get_partners]).to_vec();
     let amount_of_partners = partners_addresses.len();
     let mut partners_levels = vec![];
 

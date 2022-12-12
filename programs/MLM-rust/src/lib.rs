@@ -27,12 +27,12 @@ pub mod mlm_rust {
         Ok(())
     }
 
-    pub fn invest(ctx: Context<Invest>, amount: u64, payer_account: Pubkey) -> ProgramResult {
-        instructions::invest(ctx, amount, payer_account)
+    pub fn invest(ctx: Context<Invest>, amount_to_invest: u64, payer_account: Pubkey) -> ProgramResult {
+        instructions::invest(ctx, amount_to_invest, payer_account)
     }
 
-    pub fn withdraw(ctx: Context<Withdraw>, account_to_withdraw: Pubkey) -> ProgramResult {
-        instructions::withdraw(ctx, account_to_withdraw)
+    pub fn withdraw(ctx: Context<Withdraw>, payment_account: Pubkey) -> ProgramResult {
+        instructions::withdraw(ctx, payment_account)
     }
 
     pub fn signup(ctx: Context<Signup>, account: Pubkey, referal_link: Pubkey) -> ProgramResult {
