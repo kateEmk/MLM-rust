@@ -1,22 +1,56 @@
-use crate::{LEVEL_INVESTMENTS, MLmSystem};
+use anchor_lang::prelude::*;
+use solana_client::rpc_client::RpcClient;
 use anchor_lang::{
-    ToAccountInfo,
-    prelude::{Context, CpiContext, Pubkey}
+    solana_program::msg,
+    solana_program::native_token::LAMPORTS_PER_SOL,
 };
-use anchor_spl::token;
-use anchor_spl::token::{transfer, Transfer};
-use solana_program::entrypoint::ProgramResult;
-use solana_program::msg;
+use solana_sdk::{
+    commitment_config::CommitmentConfig,
+    system_instruction::transfer,
+    transaction::Transaction,
+    signature::Keypair
+};
 
 
-pub fn get_level(mlm_system: &MLmSystem, account: Pubkey) -> u128 {
-    let balance: f64 = *(mlm_system.accounts_balance.get(&account).unwrap()) as f64;
-    let mut res: u128 = 0;
-    for mut i in 0..9 {
-        if balance < LEVEL_INVESTMENTS[i] {
-            i = i + 1;
-            res = i as u128;
-        }
+pub fn transfer_tokens(from: Pubkey, to: Pubkey, amount: f32) {
+    let signer = Keypair::new();
+
+    msg!(
+        "Transferring {} tokens from {} to {}",
+        amount,
+        from.to_string(),
+        to.to_string()
+    );
+
+    let rpc_url = String::from("https://api.devnet.solana.com");
+    let connection = RpcClient::new_with_commitment(rpc_url, CommitmentConfig::confirmed());
+
+    match connection.request_airdrop(&from, LAMPORTS_PER_SOL) {
+        Ok(sig) => loop {
+            if let Ok(confirmed) = connection.confirm_transaction(&sig) {
+                if confirmed {
+                    println!("Transaction: {} Status: {}", sig, confirmed);
+                    break;
+                }
+            }
+        },
+        Err(_) => println!("Error requesting airdrop"),
+    };
+
+    let ix = transfer(&from, &to, amount as u64);
+
+    let recent_blockhash = connection.get_latest_blockhash().expect("Failed to get latest blockhash.");
+    let txn = Transaction::new_signed_with_payer(&[ix], Some(&from), &[&signer], recent_blockhash);
+
+    match connection.send_and_confirm_transaction(&txn){
+        Ok(sig) => loop {
+            if let Ok(confirmed) = connection.confirm_transaction(&sig) {
+                if confirmed {
+                    println!("Transaction: {} Status: {}", sig, confirmed);
+                    break;
+                }
+            }
+        },
+        Err(e) => println!("Error transferring Sol:, {:?}", e),
     }
-    return res
 }

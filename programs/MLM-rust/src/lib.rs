@@ -35,11 +35,11 @@ pub mod mlm_rust {
         instructions::withdraw(ctx, account_to_withdraw)
     }
 
-    pub fn login(ctx: Context<Login>, account: Pubkey, referal_link: Pubkey) -> ProgramResult {
-        instructions::login(ctx, account, referal_link)
+    pub fn signup(ctx: Context<Signup>, account: Pubkey, referal_link: Pubkey) -> ProgramResult {
+        instructions::signup(ctx, account, referal_link)
     }
 
     pub fn direct_partners_info(ctx: Context<DirectPartners>, sender: Pubkey) -> ProgramResult {
-        instructions::direct_partners_info(ctx, sender)
+        instructions::get_partners_info(ctx, sender)
     }
 }

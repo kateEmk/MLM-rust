@@ -1,16 +1,16 @@
-use std::{cell::RefCell, rc::Rc};
 use std::collections::HashMap;
-use anchor_lang::prelude::Pubkey;
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, Token, TokenAccount};
 
+//
+// pub struct AccountInfo<'a> {
+//
+// }
 
 #[account]
 pub struct MLmSystem{
-    pub balance: f32,
-    pub accounts_balance: HashMap<Pubkey, f32>,
-    pub partners_users: HashMap<Pubkey, Vec<Pubkey>>,
-    pub referal_of_the_user: HashMap<Pubkey, Pubkey>
+    pub accounts_balance: HashMap<Pubkey, f32>,         // save balances of users' accounts
+    pub partners_users: HashMap<Pubkey, Vec<Pubkey>>,   // address of directPartner -> users who entered with his referalLink //referals
+    pub referal_of_the_user: HashMap<Pubkey, Pubkey>    // user - referal (who invited user)
 }
 
 #[derive(Accounts)]
@@ -39,11 +39,16 @@ pub struct Withdraw<'info>{
 }
 
 #[derive(Accounts)]
-pub struct Login<'info> {
+pub struct Signup<'info> {
     pub mlm_system: Account<'info, MLmSystem>,
 }
 
 #[derive(Accounts)]
 pub struct DirectPartners<'info>{
     pub mlm_system: Account<'info, MLmSystem>,
+}
+
+pub struct GetDirectPartnersInfo {
+    pub amount_of_partners: usize,
+    pub partners_levels: Vec<u128>
 }
