@@ -1,10 +1,6 @@
 use std::collections::HashMap;
 use anchor_lang::prelude::*;
 
-//
-// pub struct AccountInfo<'a> {
-//
-// }
 
 #[account]
 pub struct MLmSystem{
@@ -30,12 +26,34 @@ pub struct BaseAccount {
 #[derive(Accounts)]
 pub struct Invest<'info> {
     pub mlm_system: Account<'info, MLmSystem>,
-    //pub accounts: &[AccountInfo]
+    pub recipient: UncheckedAccount<'info>,
+    /// CHECK: This is just an example, not checking data
+    #[account(mut)]
+    pub payer: UncheckedAccount<'info>,
 }
 
 #[derive(Accounts)]
 pub struct Withdraw<'info>{
     pub mlm_system: Account<'info, MLmSystem>,
+    pub account_to_withdraw: Account<'info, WithdrawAccount>,
+    pub recipient: UncheckedAccount<'info>,
+    /// CHECK: This is just an example, not checking data
+    #[account(mut)]
+    pub payer: UncheckedAccount<'info>,
+}
+
+#[account]
+#[derive(Default, Debug)]
+pub struct WithdrawAccount{
+    pub features: u64,
+    /// Authority address.
+    pub authority: Pubkey,
+    /// Authority address allowed to mint from the candy machine.
+    pub mint_authority: Pubkey,
+    /// The collection mint for the candy machine.
+    pub collection_mint: Pubkey,
+    /// Number of assets redeemed.
+    pub items_redeemed: u64,
 }
 
 #[derive(Accounts)]

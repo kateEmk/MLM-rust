@@ -3,11 +3,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
     entrypoint::ProgramResult,
 };
-use crate::{
-    MINIMUM_INVEST, LEVEL_COMISSION, LEVEL_INVESTMENTS,
-    state::*
-};
-use crate::utils::transfer_tokens;
+use crate::{MINIMUM_INVEST, LEVEL_COMISSION, LEVEL_INVESTMENTS, state::*};
 
 
 pub fn invest(ctx: Context<Invest>, invest_amount: u64, payer_account: Pubkey) -> ProgramResult {
@@ -15,9 +11,15 @@ pub fn invest(ctx: Context<Invest>, invest_amount: u64, payer_account: Pubkey) -
         panic!("You sent less lamports than needed");
     }
 
-    let from_pubkey = Pubkey::new_unique();
-    let amount_to_account = invest_amount as f64 * 0.95;
-    transfer_tokens(from_pubkey, payer_account, amount_to_account as f32);
+    **ctx.accounts.payer
+        .to_account_info()
+        .try_borrow_mut_lamports()? -= invest_amount;
+    **ctx.accounts.recipient
+        .to_account_info()
+        .try_borrow_mut_lamports()? += invest_amount;
+
+    ctx.accounts.mlm_system.accounts_balance[&payer_account] + invest_amount as f32 * 5.0 / 100.0;
+    let amount_to_account = invest_amount - (invest_amount * 5 / 100);
     ctx.accounts.mlm_system.accounts_balance.insert(payer_account, amount_to_account as f32);
     Ok(())
 }
@@ -42,7 +44,12 @@ pub fn withdraw(ctx: Context<Withdraw>, payment_account: Pubkey) -> ProgramResul
             current_address = *ctx.accounts.mlm_system.referal_of_the_user.get(&payment_account).unwrap();
             index = get_level(ctx.accounts.mlm_system.borrow(), payment_account) as usize / PERCENTAGE;
             comission_to_partner_account = user_balance * LEVEL_COMISSION[index];
-            transfer_tokens(payment_account, current_address, comission_to_partner_account);
+            **ctx.accounts.payer
+                .to_account_info()
+                .try_borrow_mut_lamports()? -= comission_to_partner_account as u64;
+            **ctx.accounts.recipient
+                .to_account_info()
+                .try_borrow_mut_lamports()? += comission_to_partner_account as u64;
             user_balance = user_balance - comission_to_partner_account;
         }
     }
@@ -60,7 +67,7 @@ pub fn get_level(mlm_system: &MLmSystem, account: Pubkey) -> u128 {
             res = (i + 1) as u128;
         }
     }
-    return res
+    return res;
 }
 
 
@@ -70,6 +77,7 @@ pub fn signup(ctx: Context<Signup>, account: Pubkey, referal_link: Pubkey) -> Pr
         .to_vec();
     addresses_of_referals.push(account);
     ctx.accounts.mlm_system.partners_users.insert(referal_link, addresses_of_referals as Vec<Pubkey>);
+    println!("done");
     Ok(())
 }
 
