@@ -4,7 +4,7 @@ use anchor_lang::prelude::*;
 
 #[account]
 pub struct MLmSystem{
-    pub accounts_balance: HashMap<Pubkey, f32>,         // save balances of users' accounts
+    pub accounts_balance: HashMap<Pubkey, u64>,         // save balances of users' accounts
     pub partners_users: HashMap<Pubkey, Vec<Pubkey>>,   // address of directPartner -> users who entered with his referalLink //referals
     pub referal_of_the_user: HashMap<Pubkey, Pubkey>    // user - referal (who invited user)
 }
@@ -26,6 +26,7 @@ pub struct BaseAccount {
 #[derive(Accounts)]
 pub struct Invest<'info> {
     pub mlm_system: Account<'info, MLmSystem>,
+    /// CHECK: This is just an example, not checking data
     pub recipient: UncheckedAccount<'info>,
     /// CHECK: This is just an example, not checking data
     #[account(mut)]
@@ -36,6 +37,7 @@ pub struct Invest<'info> {
 pub struct Withdraw<'info>{
     pub mlm_system: Account<'info, MLmSystem>,
     pub account_to_withdraw: Account<'info, WithdrawAccount>,
+    /// CHECK: This is just an example, not checking data
     pub recipient: UncheckedAccount<'info>,
     /// CHECK: This is just an example, not checking data
     #[account(mut)]

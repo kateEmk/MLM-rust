@@ -19,15 +19,15 @@ declare_id!("A8YCxz6TRy2Y1sEvYQUWhD7ZoR81syiuWMD3LEJbLEVB");
 pub mod mlm_rust {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> ProgramResult {
+    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
         let program = &mut ctx.accounts.program;
         let authority = &mut ctx.accounts.authority;
         program.authority = authority.key();
         Ok(())
     }
 
-    pub fn invest(ctx: Context<Invest>, amount_to_invest: u64, payer_account: Pubkey) -> ProgramResult {
-        instructions::invest(ctx,amount_to_invest, payer_account)
+    pub fn invest(ctx: Context<Invest>, amount_to_invest: f32, payer_account: Pubkey) -> ProgramResult {
+        instructions::invest(ctx, amount_to_invest as u64, payer_account)
     }
 
     pub fn withdraw(ctx: Context<Withdraw>, payment_account: Pubkey) -> ProgramResult {

@@ -18,15 +18,15 @@ pub fn invest(ctx: Context<Invest>, invest_amount: u64, payer_account: Pubkey) -
         .to_account_info()
         .try_borrow_mut_lamports()? += invest_amount;
 
-    ctx.accounts.mlm_system.accounts_balance[&payer_account] + invest_amount as f32 * 5.0 / 100.0;
+    //let _ = ctx.accounts.mlm_system.accounts_balance[&payer_account] + invest_amount as f32 * 5.0 / 100.0;
     let amount_to_account = invest_amount - (invest_amount * 5 / 100);
-    ctx.accounts.mlm_system.accounts_balance.insert(payer_account, amount_to_account as f32);
+    ctx.accounts.mlm_system.accounts_balance.insert(payer_account, amount_to_account);
     Ok(())
 }
 
 
 pub fn withdraw(ctx: Context<Withdraw>, payment_account: Pubkey) -> ProgramResult {
-    let mut user_balance: f32 = *ctx.accounts.mlm_system.accounts_balance.get(&payment_account).unwrap();
+    let mut user_balance: f32 = *ctx.accounts.mlm_system.accounts_balance.get(&payment_account).unwrap() as f32;
 
     if user_balance <= 0.0 {
         panic!("You don't have money to withdraw");
@@ -54,16 +54,16 @@ pub fn withdraw(ctx: Context<Withdraw>, payment_account: Pubkey) -> ProgramResul
         }
     }
 
-    *ctx.accounts.mlm_system.accounts_balance.get_mut(&payment_account).unwrap() = 0.0;
+    *ctx.accounts.mlm_system.accounts_balance.get_mut(&payment_account).unwrap() = 0;
     Ok(())
 }
 
 
 pub fn get_level(mlm_system: &MLmSystem, account: Pubkey) -> u128 {
-    let user_balance: f64 = *(mlm_system.accounts_balance.get(&account).unwrap()) as f64;
+    let user_balance: u64 = *(mlm_system.accounts_balance.get(&account).unwrap());
     let mut res: u128 = 0;
     for mut i in 0..9 {
-        if user_balance < LEVEL_INVESTMENTS[i] {
+        if (user_balance as f64) < LEVEL_INVESTMENTS[i] {
             res = (i + 1) as u128;
         }
     }
