@@ -1,74 +1,112 @@
-use std::collections::HashMap;
 use anchor_lang::prelude::*;
 
 
-#[account]
-pub struct MLmSystem{
-    pub accounts_balance: HashMap<Pubkey, u64>,         // save balances of users' accounts
-    pub partners_users: HashMap<Pubkey, Vec<Pubkey>>,   // address of directPartner -> users who entered with his referalLink //referals
-    pub referal_of_the_user: HashMap<Pubkey, Pubkey>    // user - referal (who invited user)
-}
-
 #[derive(Accounts)]
+#[instruction(program_bump: u8)]
 pub struct Initialize<'info>{
-    #[account(init, payer = authority, space = 9000)]
+    #[account(
+        init,
+        seeds = [b"program".as_ref()],
+        bump,
+        payer = user,
+        space = 8 + 2 + 4 + 200 + 1
+    )]
     pub program: Account<'info, BaseAccount>,
     #[account(mut)]
-    pub authority: Signer<'info>,
-    pub system_program: Program<'info, System>,     // required element to create solana data
+    pub user: Signer<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[account]
+#[derive(Default)]
 pub struct BaseAccount {
-    pub authority: Pubkey
+    pub balance: u64,
+    pub bump: u8
 }
 
 #[derive(Accounts)]
-pub struct Invest<'info> {
-    pub mlm_system: Account<'info, MLmSystem>,
-    /// CHECK: This is just an example, not checking data
-    pub recipient: UncheckedAccount<'info>,
-    /// CHECK: This is just an example, not checking data
+#[instruction(program_bump: u8)]
+pub struct UserPdaAccount<'info> {
+    #[account(
+        init,
+        seeds = [b"program".as_ref()],
+        bump,
+        payer = user,
+        space = 8 + 2 + 4 + 200 + 1
+    )]
+    pub user_info: Account<'info, UserInfo>,
     #[account(mut)]
-    pub payer: UncheckedAccount<'info>,
-}
-
-#[derive(Accounts)]
-pub struct Withdraw<'info>{
-    pub mlm_system: Account<'info, MLmSystem>,
-    pub account_to_withdraw: Account<'info, WithdrawAccount>,
-    /// CHECK: This is just an example, not checking data
-    pub recipient: UncheckedAccount<'info>,
-    /// CHECK: This is just an example, not checking data
-    #[account(mut)]
-    pub payer: UncheckedAccount<'info>,
+    pub user: Signer<'info>,
+    pub system_program: Program<'info, System>,
+    // /// CHECK: This is just an example, not checking data
+    // pub recipient: UncheckedAccount<'info>,
 }
 
 #[account]
-#[derive(Default, Debug)]
-pub struct WithdrawAccount{
-    pub features: u64,
-    /// Authority address.
-    pub authority: Pubkey,
-    /// Authority address allowed to mint from the candy machine.
-    pub mint_authority: Pubkey,
-    /// The collection mint for the candy machine.
-    pub collection_mint: Pubkey,
-    /// Number of assets redeemed.
-    pub items_redeemed: u64,
+pub struct UserInfo {
+    pub balance: u64,
+    pub partners: Vec<Pubkey>,
+    pub referal: Pubkey,
+    pub seeds: String,
+    pub bump: u8,
 }
 
-#[derive(Accounts)]
-pub struct Signup<'info> {
-    pub mlm_system: Account<'info, MLmSystem>,
-}
+// #[derive(Accounts)]
+// pub struct Invest<'info> {
+//     // #[account(
+//     //     init, payer = user, space = 8 + 2 + 4 + 200 + 1, seeds = [b"user-stats", user.key().as_ref()], bump
+//     // )]
+//     // pub user: Account<'info, CreateUserInfo<'info>>,
+//     /// CHECK: This is just an example, not checking data
+//     pub recipient: UncheckedAccount<'info>,
+//     /// CHECK: This is just an example, not checking data
+//     #[account(mut)]
+//     pub payer: UncheckedAccount<'info>,
+// }
 
-#[derive(Accounts)]
-pub struct DirectPartners<'info>{
-    pub mlm_system: Account<'info, MLmSystem>,
-}
+// #[derive(Accounts)]
+// #[instruction(program_bump: u8)]
+// pub struct Withdraw<'info> {
+//     #[account(
+//         init, payer = user, space = 8 + 2 + 4 + 200 + 1, seeds = [b"user_info", user.key().as_ref()], bump
+//     )]
+//     pub user_info: Account<'info, UserInfo<'info>>,
+//     #[account(mut)]
+//     pub user: Signer<'info>,
+//     pub system_program: Program<'info, System>,
+// }
 
-pub struct GetDirectPartnersInfo {
-    pub amount_of_partners: usize,
-    pub partners_levels: Vec<u128>
-}
+// #[derive(Accounts)]
+// pub struct Withdraw<'info>{
+//     pub mlm_system: Account<'info, MLmSystem<'info>>,
+//     pub account_to_withdraw: Account<'info, WithdrawAccount>,
+//     /// CHECK: This is just an example, not checking data
+//     pub recipient: UncheckedAccount<'info>,
+//     /// CHECK: This is just an example, not checking data
+//     #[account(mut)]
+//     pub payer: UncheckedAccount<'info>,
+// }
+
+// #[account]
+// #[derive(Default, Debug)]
+// pub struct WithdrawAccount{
+//     pub features: u64,
+//     /// Authority address.
+//     pub authority: Pubkey,
+//     /// Authority address allowed to mint from the candy machine.
+//     pub mint_authority: Pubkey,
+//     /// The collection mint for the candy machine.
+//     pub collection_mint: Pubkey,
+//     /// Number of assets redeemed.
+//     pub items_redeemed: u64,
+// }
+
+// #[derive(Accounts)]
+// pub struct Signup<'info> {
+//     pub mlm_system: Account<'info, MLmSystem<'info>>,
+// }
+//
+// #[derive(Accounts)]
+// pub struct DirectPartners<'info>{
+//     pub mlm_system: Account<'info, MLmSystem<'info>>,
+// }
