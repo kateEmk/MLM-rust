@@ -43,9 +43,15 @@ describe("MLM-rust", () => {
     });
 
     it("Users had been signed up", async () => {
+<<<<<<< Updated upstream
         const tx1 = await program.methods.signup(user2.publicKey, user1.publicKey).rpc()
         const tx2 = await program.methods.signup(user2_2.publicKey, user1.publicKey).rpc()
         const tx3 = await program.methods.signup(user2_3.publicKey, user1.publicKey).rpc()
+=======
+        const tx1 = await program.methods.login(user2.publicKey, user1.publicKey).rpc()
+        const tx2 = await program.methods.login(user2_2.publicKey, user1.publicKey).rpc()
+        const tx3 = await program.methods.login(user2_3.publicKey, user1.publicKey).rpc()
+>>>>>>> Stashed changes
         if (tx1 && tx2 && tx3) {
             console.log("Users had been signed up")
         }
@@ -67,6 +73,7 @@ describe("MLM-rust", () => {
         console.log("transaction => successfull")
         console.log("Balance after sending transaction:", accBalance.toString())
     })
+<<<<<<< Updated upstream
 
     it("Should withdraw all funds", async function() {
         send_lamports(user3, program, connection)
@@ -74,5 +81,16 @@ describe("MLM-rust", () => {
         await program.methods.withdraw(user3)
         assert.equal(await connection.getBalance(user3.publicKey), 0)
     })
+=======
+
+    it("Should withdraw all funds", async function() {
+        send_lamports(user3, program, connection)
+        console.log("Balance of user before withdraw: ", await connection.getBalance(user3.publicKey))
+        await program.methods.withdraw(user3)
+        assert.equal(await connection.getBalance(user3.publicKey), 0)
+    })
+
+
+>>>>>>> Stashed changes
 
 });
