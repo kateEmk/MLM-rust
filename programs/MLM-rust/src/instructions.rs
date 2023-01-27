@@ -6,8 +6,8 @@ use anchor_lang::solana_program::{
 use crate::{MINIMUM_INVEST, LEVEL_COMISSION, LEVEL_INVESTMENTS, state::*};
 
 
-pub fn invest(ctx: Context<Invest>, invest_amount: u64, payer_account: Pubkey) -> ProgramResult {
-    if invest_amount < MINIMUM_INVEST {
+pub fn invest(ctx: Context<Invest>, invest_amount: f32, payer_account: Pubkey) -> ProgramResult {
+    if invest_amount < MINIMUM_INVEST as f32 {
         panic!("You sent less lamports than needed");
     }
 
@@ -21,6 +21,7 @@ pub fn invest(ctx: Context<Invest>, invest_amount: u64, payer_account: Pubkey) -
     //let _ = ctx.accounts.mlm_system.accounts_balance[&payer_account] + invest_amount as f32 * 5.0 / 100.0;
     let amount_to_account = invest_amount - (invest_amount * 5 / 100);
     ctx.accounts.mlm_system.accounts_balance.insert(payer_account, amount_to_account);
+
     Ok(())
 }
 

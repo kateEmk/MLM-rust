@@ -27,7 +27,7 @@ pub mod mlm_rust {
     }
 
     pub fn invest(ctx: Context<Invest>, amount_to_invest: f32, payer_account: Pubkey) -> ProgramResult {
-        instructions::invest(ctx, amount_to_invest as u64, payer_account)
+        instructions::invest(ctx, amount_to_invest, payer_account)
     }
 
     pub fn withdraw(ctx: Context<Withdraw>, payment_account: Pubkey) -> ProgramResult {
