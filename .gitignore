@@ -5,5 +5,5 @@ target
 **/*.rs.bk
 node_modules
 test-ledger
-.idea/
+.idea
 .prettierignore
