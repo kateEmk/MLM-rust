@@ -17,7 +17,7 @@ pub fn invest(ctx: Context<UserPdaAccount>, invest_amount: u64, user_bump: u8) -
 
     let user = &mut ctx.accounts.user_info;
     let amount_to_account = invest_amount - (invest_amount * 5 / 100);
-    user.balance = amount_to_account;
+    ctx.accounts.mlm_system.accounts_balance.insert(payer_account, amount_to_account);
     Ok(())
 }
 
